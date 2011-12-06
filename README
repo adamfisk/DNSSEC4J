@@ -1,2 +1,4 @@
 DNSSEC4J is a java library that utilizes the DNSSEC primitives in dnsjava to allow users to automatically 
 request extended flags in DNS lookups and to verify the signatures on records when they exist.
+
+DNSSEC4J is funded through the generous support of the NLnet Foundation at http://nlnet.nl.
