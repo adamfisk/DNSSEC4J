@@ -1,10 +1,8 @@
 package org.littleshoot.dnssec4j;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.Iterator;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +32,9 @@ public class DnsSecTest {
     @Test
     public void testDNSKEYLookup() throws Exception {
         final String site = "www.verisign.com";
-        verifyFullRecord(site);
-    }
-    
-    private void verifyFullRecord(final String site) throws IOException {
         final Name name = Name.fromString(site);
         final Name full = Name.concatenate(name, Name.root);
         verifyFullRecord(full);
-        
     }
 
     private void verifyFullRecord(final Name full) throws IOException {
@@ -76,9 +69,53 @@ public class DnsSecTest {
                 System.out.println("\nLaunch a query to find a RRset of type DNSKEY for zone: "+rec.getSigner());
                 try {
                     verifySig(set, rec);
-                } catch (DNSSECException e) {
+                    
+                    verifyDsRecordForSignerOf(rec);
+                    
+                } catch (final DNSSECException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void verifyDsRecordForSignerOf(final RRSIGRecord rec) 
+        throws IOException, DNSSECException {
+        final Name signer = rec.getSigner();
+        System.out.println("\nLaunch a query to find a RRset of type DS for zone: "+signer);
+        final Resolver res = new ExtendedResolver();
+        res.setEDNS(0, 0, ExtendedFlags.DO, null);
+        res.setTCP(true);
+        
+        // Timeouts are in seconds.
+        res.setTimeout(40);
+        
+        final Record question = Record.newRecord(signer, Type.DS, DClass.IN);
+        final Message query = Message.newQuery(question);
+        final Message response = res.send(query);
+        //System.out.println("DS RESPONSE:\n**************\n"+response+"\n**************\n");
+        
+        final RRset[] answer = response.getSectionRRsets(Section.ANSWER);
+        for (final RRset set : answer) {
+            //System.out.println(set);
+            final Iterator<Record> rrIter = set.rrs();
+            System.out.println("\n;; DSset of the DNSKEYset");
+            while (rrIter.hasNext()) {
+                System.out.println(rrIter.next());
+            }
+            final Iterator<Record> sigIter = set.sigs();
+            System.out.println("\n;; RRSIG of the DSset of the DNSKEYset");
+            while (sigIter.hasNext()) {
+                final Record sigRec = sigIter.next();
+                System.out.println(sigRec);
+                if (sigRec instanceof RRSIGRecord) {
+                    final RRSIGRecord rr = (RRSIGRecord) sigRec;
+                    System.out.println("\n;; Verifying signature of DS record");
+                    verifySig(set, rr);
+                } else {
+                    //System.out.println("non-sig record");
+                    //System.out.println(sigRec);
                 }
             }
         }
@@ -138,7 +175,7 @@ public class DnsSecTest {
             }
             return keyRec;
         } finally {
-            Options.set("multiline", "false");
+            Options.unset("multiline");
         }
     }
 
