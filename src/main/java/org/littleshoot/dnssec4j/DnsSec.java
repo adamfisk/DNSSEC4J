@@ -3,7 +3,6 @@ package org.littleshoot.dnssec4j;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import org.slf4j.Logger;
@@ -23,7 +22,6 @@ import org.xbill.DNS.RRSIGRecord;
 import org.xbill.DNS.RRset;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Resolver;
-import org.xbill.DNS.ResolverConfig;
 import org.xbill.DNS.Section;
 import org.xbill.DNS.Type;
 
@@ -32,7 +30,7 @@ import org.xbill.DNS.Type;
  */
 public class DnsSec {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory.getLogger(DnsSec.class);
     
     {
     //System.setProperty("sun.net.spi.nameservice.nameservers", "8.8.8.8,8.8.4.4");
@@ -42,13 +40,23 @@ public class DnsSec {
     //System.setProperty("sun.net.spi.nameservice.nameservers", "149.20.64.20,149.20.64.21");
     }
     
+    /**
+     * Access the specified URL and verifies the signatures of DNSSEC responses
+     * if they exist, returning the resolved IP address.
+     * 
+     * @param name The name of the site.
+     * @return The IP address for the specified domain, verified if possible.
+     * @throws IOException If there's an IO error accessing the nameservers or
+     * verifying the signatures.
+     * @throws DNSSECException If there's a DNS error verifying the signatures
+     * for any domain.
+     */
     public static InetAddress getByName(final String name) 
         throws IOException, DNSSECException {
         final Name full = Name.concatenate(Name.fromString(name), Name.root);
 
         System.out.println("Verifying record: "+ full);
-        final String [] servers = ResolverConfig.getCurrentConfig().servers();
-        System.out.println(Arrays.asList(servers));
+        //final String [] servers = ResolverConfig.getCurrentConfig().servers();
         final Resolver res = new ExtendedResolver();
         res.setEDNS(0, 0, ExtendedFlags.DO, null);
         res.setTCP(true);
@@ -60,28 +68,30 @@ public class DnsSec {
         final RRset[] answer = response.getSectionRRsets(Section.ANSWER);
         
         final ArrayList<InetAddress> addresses = new ArrayList<InetAddress>();
-        //System.out.println("Answers: "+Arrays.asList(answer));
-        // TODO: Verify all sets!
         for (final RRset set : answer) {
-        //for (int i = 0; i < 1; i++) {
-            //final RRset set = answer[i];
             System.out.println("\n;; RRset to chase:");
-            //System.out.println(set);
-            final Iterator<Record> rrIter = set.rrs();
+
+            // First check for a CNAME and target.
+            Iterator<Record> rrIter = set.rrs();
+            boolean hasCname = false;
+            Name cNameTarget = null;
+            while (rrIter.hasNext()) {
+                final Record rec = rrIter.next();
+                final int type = rec.getType();
+                
+                if (type == Type.CNAME) {
+                    final CNAMERecord cname = (CNAMERecord) rec;
+                    hasCname = true;
+                    cNameTarget = cname.getTarget();
+                } 
+            }
+            
+            rrIter = set.rrs();
             while (rrIter.hasNext()) {
                 final Record rec = rrIter.next();
                 System.out.println(rec);
                 final int type = rec.getType();
-                boolean hasCname = false;
-                Name cNameTarget = null;
-                if (type == Type.CNAME) {
-                    final CNAMERecord cname = (CNAMERecord) rec;
-                    System.out.println("CNAME NAME: "+cname.getName());
-                    System.out.println("CNAME TARGET: "+cname.getTarget());
-                    System.out.println("CNAME ALIAS: "+cname.getAlias());
-                    hasCname = true;
-                    cNameTarget = cname.getTarget();
-                } else if (type == Type.A) {
+                if (type == Type.A) {
                     final ARecord arec = (ARecord) rec;
                     if (hasCname) {
                         if (rec.getName().equals(cNameTarget)) {
@@ -170,7 +180,7 @@ public class DnsSec {
                 }
             }
             if (!keyVerified) {
-                System.out.println("KEY NOT VERIFIED!!");
+                log.info("Key not verified -- unsigned DS record?");
                 //throw new IOException("Key not verified!!");
             }
             if (keyRec == null) {
