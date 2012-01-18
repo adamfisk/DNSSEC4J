@@ -25,7 +25,7 @@ public class DnsSecTest {
     public void testGetByName() throws Exception {
         final Collection<String> hosts = Arrays.asList("www.verisign.com",
             "nlnet.nl", "www.beck.com", "www.wikipedia.org", 
-            "smartfil.es");
+            "smartfil.es", "www.asperasoft.com", "www.brown.edu");
         
         for (final String host : hosts) {
             System.out.println("\n****************************************");
@@ -48,8 +48,8 @@ public class DnsSecTest {
         // so we cannot check for equality. We just make sure the addresses
         // we get back are reachable.
         final Collection<String> varyingResultHosts = Arrays.asList(
-                "www.google.com", "www.littleshoot.org", "www.reddit.com",
-                "adamfisk.wordpress.com");
+            "www.google.com", "www.littleshoot.org", "www.reddit.com",
+            "adamfisk.wordpress.com", "www.bittorrent.com");
         
         for (final String host : varyingResultHosts) {
             System.out.println("\n****************************************");

@@ -13,6 +13,12 @@ import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSKEYRecord;
 import org.xbill.DNS.DNSSEC;
 import org.xbill.DNS.DNSSEC.DNSSECException;
+import org.xbill.DNS.DNSSEC.KeyMismatchException;
+import org.xbill.DNS.DNSSEC.MalformedKeyException;
+import org.xbill.DNS.DNSSEC.SignatureExpiredException;
+import org.xbill.DNS.DNSSEC.SignatureNotYetValidException;
+import org.xbill.DNS.DNSSEC.SignatureVerificationException;
+import org.xbill.DNS.DNSSEC.UnsupportedAlgorithmException;
 import org.xbill.DNS.ExtendedFlags;
 import org.xbill.DNS.ExtendedResolver;
 import org.xbill.DNS.Message;
@@ -33,7 +39,7 @@ public class DnsSec {
     private static final Logger log = LoggerFactory.getLogger(DnsSec.class);
     
     {
-    //System.setProperty("sun.net.spi.nameservice.nameservers", "8.8.8.8,8.8.4.4");
+    System.setProperty("sun.net.spi.nameservice.nameservers", "8.8.8.8,8.8.4.4");
     //System.setProperty("sun.net.spi.nameservice.nameservers", "75.75.75.75 ,75.75.75.76");
         
     // These are from https://www.dns-oarc.net/oarc/services/odvr
@@ -48,6 +54,12 @@ public class DnsSec {
      * @return The IP address for the specified domain, verified if possible.
      * @throws IOException If there's an IO error accessing the nameservers or
      * verifying the signatures.
+     * @throws UnsupportedAlgorithmException The algorithm is unknown
+     * @throws MalformedKeyException The key is malformed
+     * @throws KeyMismatchException The key and signature do not match
+     * @throws SignatureExpiredException The signature has expired
+     * @throws SignatureNotYetValidException The signature is not yet valid
+     * @throws SignatureVerificationException The signature does not verify.
      * @throws DNSSECException If there's a DNS error verifying the signatures
      * for any domain.
      */
@@ -110,7 +122,6 @@ public class DnsSec {
                 verifyZone(set, rec);
             }
         }
-        System.out.println("ADDRESSES: "+addresses);
         return addresses.get(0);
     }
 
@@ -209,11 +220,9 @@ public class DnsSec {
         final Record question = Record.newRecord(signer, Type.DS, DClass.IN);
         final Message query = Message.newQuery(question);
         final Message response = res.send(query);
-        System.out.println("DS RESPONSE:\n**************\n"+response+"\n**************\n");
         
         final RRset[] answer = response.getSectionRRsets(Section.ANSWER);
         for (final RRset set : answer) {
-            //System.out.println(set);
             final Iterator<Record> rrIter = set.rrs();
             System.out.println("\n;; DSset of the DNSKEYset");
             while (rrIter.hasNext()) {
