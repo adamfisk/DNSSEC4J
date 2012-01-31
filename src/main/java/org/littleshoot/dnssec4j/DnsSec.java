@@ -138,8 +138,6 @@ public class DnsSec {
         
         boolean keyVerified = false;
         DNSKEYRecord keyRec = null;
-        RRset recursiveSet = null;
-        RRSIGRecord recursiveSig = null;
         
         // We need to perform a multiline query to get the tags associated with
         // keys, which lets us verify records with the correct key.
@@ -182,22 +180,22 @@ public class DnsSec {
                     // the signature as we go, and we'll validate the DS record
                     // as well later.
                     if (rec.getFootprint() == tag) {
-                        System.out.println("Found matching footprint/tag!! "+tag);
                         DNSSEC.verify(answerSet, rec, keyRec);
                         keyVerified = true;
-                        recursiveSet = answerSet;
-                        recursiveSig = rec;
                     }
                 }
+                if (!keyVerified) {
+                    log.info("DNSKEY not verified");
+                    //throw new IOException("Key not verified!!");
+                } else {
+                    log.info("DNSKEY verified!!");
+                }
+                keyVerified = false;
             }
-            if (!keyVerified) {
-                log.info("Key not verified -- unsigned DS record?");
-                //throw new IOException("Key not verified!!");
-            }
+
             if (keyRec == null) {
                 throw new IOException("Did not find DNSKEY record matching tag: "+tag);
             }
-            //return keyRec;
         } finally {
             Options.unset("multiline");
         }
@@ -220,6 +218,7 @@ public class DnsSec {
         final Record question = Record.newRecord(signer, Type.DS, DClass.IN);
         final Message query = Message.newQuery(question);
         final Message response = res.send(query);
+        System.out.println("Sent query and got response: "+response);
         
         final RRset[] answer = response.getSectionRRsets(Section.ANSWER);
         for (final RRset set : answer) {
@@ -239,15 +238,9 @@ public class DnsSec {
                 if (sigRec instanceof RRSIGRecord) {
                     final RRSIGRecord rr = (RRSIGRecord) sigRec;
                     
-                    //System.out.println("VERIFYING DS RECORD -- RECURSIVE CALL!!");
                     System.out.println(";; Now, we want to validate the DS :  recursive call");
                     verifyZone(set, rr);
-                    //System.out.println("\n;; Verifying signature of DS record");
-                    //verifySig(set, rr);
-                } else {
-                    //System.out.println("non-sig record");
-                    //System.out.println(sigRec);
-                }
+                } 
             }
         }
         

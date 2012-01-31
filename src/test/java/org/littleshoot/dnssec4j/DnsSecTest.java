@@ -25,7 +25,9 @@ public class DnsSecTest {
     public void testGetByName() throws Exception {
         final Collection<String> hosts = Arrays.asList("www.verisign.com",
             "nlnet.nl", "www.beck.com", "www.wikipedia.org", 
-            "smartfil.es", "www.asperasoft.com", "www.brown.edu");
+            "smartfil.es", "www.asperasoft.com", "www.brown.edu",
+            "www.opendnssec.org", "www.root-dnssec.org", "www.dnssec.org");
+        
         
         for (final String host : hosts) {
             System.out.println("\n****************************************");
@@ -49,7 +51,8 @@ public class DnsSecTest {
         // we get back are reachable.
         final Collection<String> varyingResultHosts = Arrays.asList(
             "www.google.com", "www.littleshoot.org", "www.reddit.com",
-            "adamfisk.wordpress.com", "www.bittorrent.com");
+            "adamfisk.wordpress.com", "www.bittorrent.com",
+            "www.comcast.net");
         
         for (final String host : varyingResultHosts) {
             System.out.println("\n****************************************");
