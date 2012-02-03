@@ -26,7 +26,7 @@ public class VerifiedAddressFactory {
      * @param port The port.
      * @return The endpoint.
      */
-    public static SocketAddress newInetSocketAddress(final String host, 
+    public static InetSocketAddress newInetSocketAddress(final String host, 
         final int port) {
         return newInetSocketAddress(host, port, true);
     }
@@ -40,7 +40,7 @@ public class VerifiedAddressFactory {
      * @param useDnsSec Whether or not to use DNSSEC.
      * @return The endpoint.
      */
-    public static SocketAddress newInetSocketAddress(final String host, 
+    public static InetSocketAddress newInetSocketAddress(final String host, 
         final int port, final boolean useDnsSec) {
         if (useDnsSec) {
             try {
