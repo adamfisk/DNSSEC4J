@@ -12,7 +12,6 @@ import org.xbill.DNS.CNAMERecord;
 import org.xbill.DNS.DClass;
 import org.xbill.DNS.DNSKEYRecord;
 import org.xbill.DNS.DNSSEC;
-import org.xbill.DNS.DNSSEC.DNSSECException;
 import org.xbill.DNS.DNSSEC.KeyMismatchException;
 import org.xbill.DNS.DNSSEC.MalformedKeyException;
 import org.xbill.DNS.DNSSEC.SignatureExpiredException;
@@ -48,23 +47,17 @@ public class DnsSec {
     
     /**
      * Access the specified URL and verifies the signatures of DNSSEC responses
-     * if they exist, returning the resolved IP address.
+     * if they exist, returning the resolved IP address. 
      * 
      * @param name The name of the site.
      * @return The IP address for the specified domain, verified if possible.
      * @throws IOException If there's an IO error accessing the nameservers or
-     * verifying the signatures.
-     * @throws UnsupportedAlgorithmException The algorithm is unknown
-     * @throws MalformedKeyException The key is malformed
-     * @throws KeyMismatchException The key and signature do not match
-     * @throws SignatureExpiredException The signature has expired
-     * @throws SignatureNotYetValidException The signature is not yet valid
-     * @throws SignatureVerificationException The signature does not verify.
+     * sending or receiving messages with them.
      * @throws DNSSECException If there's a DNS error verifying the signatures
      * for any domain.
      */
     public static InetAddress getByName(final String name) 
-        throws IOException, DNSSECException {
+        throws DNSSECException, IOException {
         final Name full = Name.concatenate(Name.fromString(name), Name.root);
 
         System.out.println("Verifying record: "+ full);
@@ -126,7 +119,7 @@ public class DnsSec {
     }
 
     private static void verifyZone(final RRset set, final RRSIGRecord record) 
-        throws IOException, DNSSECException {
+        throws DNSSECException, IOException {
         System.out.println("\nLaunch a query to find a RRset of type DNSKEY for zone: "+record.getSigner());
 
         //System.out.println("\nVerifying sig for rec: "+record);
@@ -194,12 +187,18 @@ public class DnsSec {
             }
 
             if (keyRec == null) {
-                throw new IOException("Did not find DNSKEY record matching tag: "+tag);
+                throw new DNSSECException("Did not find DNSKEY record matching tag: "+tag);
             }
+        } catch (final org.xbill.DNS.DNSSEC.DNSSECException e) {
+            throw new DNSSECException("Error verifying record", e);
         } finally {
             Options.unset("multiline");
         }
-        DNSSEC.verify(set, record, keyRec);
+        try {
+            DNSSEC.verify(set, record, keyRec);
+        } catch (final org.xbill.DNS.DNSSEC.DNSSECException e) {
+            throw new DNSSECException("Error verifying record", e);
+        }
         
         verifyDsRecordForSignerOf(record);
     }
