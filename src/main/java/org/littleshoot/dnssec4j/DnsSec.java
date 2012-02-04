@@ -2,6 +2,7 @@ package org.littleshoot.dnssec4j;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -37,6 +38,26 @@ public class DnsSec {
         
     // These are from https://www.dns-oarc.net/oarc/services/odvr
     //System.setProperty("sun.net.spi.nameservice.nameservers", "149.20.64.20,149.20.64.21");
+    }
+    
+    /**
+     * If the specified {@link InetSocketAddress} has not already resolved to
+     * an IP address, this verifies the host name and returns a new, verified
+     * and resolved {@link InetSocketAddress}. 
+     * 
+     * @param unresolved An unresolved {@link InetSocketAddress}.
+     * @return The resolved and verified {@link InetSocketAddress}.
+     * @throws DNSSECException If there's a problem with the DNS signature.
+     * @throws IOException If there's a problem with the nameservers.
+     */
+    public static InetSocketAddress verify(final InetSocketAddress unresolved) 
+        throws DNSSECException, IOException {
+        if (!unresolved.isUnresolved()) {
+            return unresolved;
+        } 
+        
+        final InetAddress verified = getByName(unresolved.getHostName());
+        return new InetSocketAddress(verified, unresolved.getPort());
     }
     
     /**

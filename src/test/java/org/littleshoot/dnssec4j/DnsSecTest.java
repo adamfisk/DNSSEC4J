@@ -22,6 +22,20 @@ public class DnsSecTest {
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     @Test
+    public void testVerify() throws Exception {
+        final InetSocketAddress base = new InetSocketAddress("www.brown.edu", 80);
+        final InetAddress ia = base.getAddress();
+        final String resolved = ia.getHostAddress();
+        
+        final InetSocketAddress unresolved = 
+            InetSocketAddress.createUnresolved("www.brown.edu", 80);
+        final InetSocketAddress verified = DnsSec.verify(unresolved);
+        
+        final String resolvedAndVerified = verified.getAddress().getHostAddress();
+        assertEquals(resolved, resolvedAndVerified);
+    }
+    
+    @Test
     public void testGetByName() throws Exception {
         final Collection<String> hosts = Arrays.asList("www.verisign.com",
             "nlnet.nl", "www.beck.com", "www.wikipedia.org", 

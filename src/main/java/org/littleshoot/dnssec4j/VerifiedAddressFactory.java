@@ -3,9 +3,8 @@ package org.littleshoot.dnssec4j;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import java.net.UnknownHostException;
 
-import org.littleshoot.dnssec4j.DnsSec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +24,10 @@ public class VerifiedAddressFactory {
      * @param host The host.
      * @param port The port.
      * @return The endpoint.
+     * @throws UnknownHostException If the host cannot be resolved.
      */
     public static InetSocketAddress newInetSocketAddress(final String host, 
-        final int port) {
+        final int port) throws UnknownHostException {
         return newInetSocketAddress(host, port, true);
     }
     
@@ -39,13 +39,28 @@ public class VerifiedAddressFactory {
      * @param port The port.
      * @param useDnsSec Whether or not to use DNSSEC.
      * @return The endpoint.
+     * @throws UnknownHostException If the host cannot be resolved.
      */
     public static InetSocketAddress newInetSocketAddress(final String host, 
-        final int port, final boolean useDnsSec) {
+        final int port, final boolean useDnsSec) throws UnknownHostException {
+
+        return new InetSocketAddress(newVerifiedInetAddress(host, useDnsSec), port);
+    }
+
+    /**
+     * Creates a new InetSocket, verifying the host with DNSSEC if 
+     * configured to do so.
+     * 
+     * @param host The host.
+     * @param useDnsSec Whether or not to use DNSSEC.
+     * @return The {@link InetAddress}.
+     * @throws UnknownHostException If the host cannot be resolved.
+     */
+    public static InetAddress newVerifiedInetAddress(final String host,
+        final boolean useDnsSec) throws UnknownHostException {
         if (useDnsSec) {
             try {
-                final InetAddress verifiedHost = DnsSec.getByName(host);
-                return new InetSocketAddress(verifiedHost, port);
+                return DnsSec.getByName(host);
             } catch (final IOException e) {
                 LOG.info("Could not resolve address for: "+host, e);
             } catch (final DNSSECException e) {
@@ -53,7 +68,7 @@ public class VerifiedAddressFactory {
                 throw new Error("DNSSEC error. Bad signature?", e);
             }
         }
-        return new InetSocketAddress(host, port);
+        return InetAddress.getByName(host);
     }
 
 }
