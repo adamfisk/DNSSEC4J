@@ -1,0 +1,4 @@
+The DNSSEC4J Project - Copyright 2012 Last Bamboo LLC, is licensed under the
+Apache License version 2.0 as published by the Apache Software Foundation as well
+as under the GNU General Public License Version 3.
+
