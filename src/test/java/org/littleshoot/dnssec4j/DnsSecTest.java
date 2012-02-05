@@ -38,11 +38,10 @@ public class DnsSecTest {
     @Test
     public void testGetByName() throws Exception {
         final Collection<String> hosts = Arrays.asList("www.verisign.com",
-            "nlnet.nl", "www.beck.com", "www.wikipedia.org", 
-            "smartfil.es", "www.asperasoft.com", "www.brown.edu",
-            "www.opendnssec.org", "www.root-dnssec.org", "www.dnssec.org");
-        
-        
+            "nlnet.nl", "www.beck.com", "www.wikipedia.org",
+            "smartfil.es", "www.asperasoft.com", "www.brown.edu");
+            //"www.root-dnssec.org", "www.dnssec.org", "www.opendnssec.org");
+         
         for (final String host : hosts) {
             System.out.println("\n****************************************");
             System.out.println("      TESTING "+host);
@@ -53,11 +52,12 @@ public class DnsSecTest {
             System.out.println("****************************************");
             assertTrue("Did not get address", ia != null);
             final InetAddress standard = InetAddress.getByName(host);
-            assertEquals("Results not equal for "+host, ia, standard);
+            assertEquals("Results not equal for "+host, ia.getHostAddress(), standard.getHostAddress());
             final DatagramChannel channel = DatagramChannel.open();
             final SocketAddress server = new InetSocketAddress(host, 80);
             channel.connect(server);
             assertTrue("Could not connect to host "+host, channel.isConnected());
+            //return;
         }
         
         // These domains give back different responses to different queries --

@@ -3,6 +3,7 @@ package org.littleshoot.dnssec4j;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -77,12 +78,10 @@ public class DnsSec {
 
         System.out.println("Verifying record: "+ full);
         //final String [] servers = ResolverConfig.getCurrentConfig().servers();
-        final Resolver res = new ExtendedResolver();
-        res.setEDNS(0, 0, ExtendedFlags.DO, null);
-        res.setTCP(true);
-        res.setTimeout(40);
+        final Resolver res = newResolver();
         final Record question = Record.newRecord(full, Type.A, DClass.IN);
         final Message query = Message.newQuery(question);
+        System.out.println("Sending query...");
         final Message response = res.send(query);
         System.out.println("RESPONSE: "+response);
         final RRset[] answer = response.getSectionRRsets(Section.ANSWER);
@@ -151,16 +150,12 @@ public class DnsSec {
         // keys, which lets us verify records with the correct key.
         try {
             Options.set("multiline");
-            final Resolver res = new ExtendedResolver();
-            res.setEDNS(0, 0, ExtendedFlags.DO, null);
-            res.setTCP(true);
-            
-            // Timeouts are in seconds.
-            res.setTimeout(40);
+            final Resolver res = newResolver();
             
             final Record question = Record.newRecord(signer, Type.DNSKEY, DClass.IN);
             final Message query = Message.newQuery(question);
             final Message response = res.send(query);
+            System.out.println("Sent query...");
             
             final RRset[] answer = response.getSectionRRsets(Section.ANSWER);
             for (final RRset answerSet : answer) {
@@ -218,17 +213,23 @@ public class DnsSec {
         verifyDsRecordForSignerOf(record);
     }
 
+    private static Resolver newResolver() throws UnknownHostException {
+        final Resolver res = new ExtendedResolver();
+        res.setEDNS(0, 0, ExtendedFlags.DO, null);
+        res.setIgnoreTruncation(false);
+        //res.setTCP(true);
+        
+        // Timeouts are in seconds.
+        res.setTimeout(15);
+        return res;
+    }
+
     private static void verifyDsRecordForSignerOf(final RRSIGRecord rec) 
         throws IOException, DNSSECException {
         final Name signer = rec.getSigner();
         System.out.println("\nLaunch a query to find a RRset of type DS for zone: "+signer);
-        final Resolver res = new ExtendedResolver();
-        res.setEDNS(0, 0, ExtendedFlags.DO, null);
-        res.setTCP(true);
-        
-        // Timeouts are in seconds.
-        res.setTimeout(40);
-        
+        final Resolver res = newResolver();
+
         final Record question = Record.newRecord(signer, Type.DS, DClass.IN);
         final Message query = Message.newQuery(question);
         final Message response = res.send(query);
