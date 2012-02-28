@@ -1,5 +1,9 @@
 DNSSEC4J is a java library that utilizes the DNSSEC primitives in dnsjava to allow users to automatically request extended flags in DNS lookups and to verify the signatures on records when they exist. It is licensed under both the Apache 2 and GNU General Public License version 3. Users of this software may utilize it under either license.
 
+DNSSEC4J is made possible through the generous contributions of the NLNet Foundation. They have helped make many projects possible, including NoScript and Tor. Please donate to them if you can at:
+
+http://nlnet.nl/donating/
+
 To integrate DNSSEC4J in your projects, you can use a maven dependency as follows:
 
 ```
@@ -52,6 +56,5 @@ To create an InetSocketAddress with the host name verified, you can do:
     final InetSocketAddress isa = VerifiedAddressFactory.newInetSocketAddress("www.verisign.com", 80);
 ```
 
-DNSSEC4J is still in its infancy and requires more thorough testing and review within the security community. It should be considered experimental and not ready for production use at this time.
+*DNSSEC4J is still in its infancy and requires more thorough testing and review within the security community. It should be considered experimental and not ready for production use at this time.*
 
-DNSSEC4J is funded through the generous support of the NLnet Foundation at http://nlnet.nl.
