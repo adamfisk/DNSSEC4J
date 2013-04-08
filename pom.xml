@@ -111,7 +111,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <nexusUrl>https://oss.sonatype.org/content/repositories/snapshots</nexusUrl>
-                    <serverId>nexus-snapshots</serverId>
+                    <serverId>sonatype-nexus-snapshots</serverId>
                 </configuration>
             </plugin>
       <plugin>
