@@ -104,6 +104,18 @@
 
     <build>
       <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.1</version>
+                <extensions>true</extensions>
+<!--
+                <configuration>
+                    <nexusUrl>http://localhost:8081/nexus/</nexusUrl>
+                    <serverId>local-nexus</serverId>
+                </configuration>
+-->
+            </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
