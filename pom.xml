@@ -107,11 +107,11 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.1</version>
+                <version>1.2</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <nexusUrl>https://oss.sonatype.org/content/repositories/snapshots</nexusUrl>
-                    <serverId>sonatype-nexus-snapshots</serverId>
+                    <serverId>local-nexus</serverId>
+                    <nexusUrl>http://localhost:8081/nexus/</nexusUrl>
                 </configuration>
             </plugin>
       <plugin>
