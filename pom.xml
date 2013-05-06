@@ -110,8 +110,8 @@
                 <version>1.2</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>local-nexus</serverId>
-                    <nexusUrl>http://localhost:8081/nexus/</nexusUrl>
+                    <serverId>sonatype-nexus-staging</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                 </configuration>
             </plugin>
       <plugin>
