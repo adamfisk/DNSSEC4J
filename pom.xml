@@ -3,7 +3,7 @@
     <groupId>org.littleshoot</groupId>
     <artifactId>dnssec4j</artifactId>
     <packaging>jar</packaging>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>0.1.3</version>
     <name>DNSSEC4j</name>
     <description>
         DNSSEC4J is a higher level wrapper around the DNSSEC primitives in dnsjava allowing applications to 
