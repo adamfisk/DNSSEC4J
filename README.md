@@ -1,3 +1,5 @@
+# This is a work in progress with major unfinished areas. Please consider patching or contributing to the Jitsi DNSSEC effort at https://github.com/jitsi/dnssecjava that is more active at this time.
+
 DNSSEC4J is a java library that utilizes the DNSSEC primitives in dnsjava to allow users to automatically request extended flags in DNS lookups and to verify the signatures on records when they exist. It is licensed under both the Apache 2 and GNU General Public License version 3. Users of this software may utilize it under either license.
 
 DNSSEC4J is made possible through the generous contributions of the **NLNet Foundation**. They have helped make many projects possible, including NoScript and Tor. Please donate to them if you can at:
